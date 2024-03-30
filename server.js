@@ -66,9 +66,18 @@ app.get('/login', (req, res) => {
 });
 
 
+// app.get('/logout', (req, res) => {
+//     req.logOut();
+//     res.redirect('/login');
+// });
 app.get('/logout', (req, res) => {
-    req.logOut();
-    res.redirect('/login');
+    req.logout(function(err) {
+        if (err) {
+            console.error("Error during logout:", err);
+            return next(err);
+        }
+        res.redirect('/login');
+    });
 });
 
 
@@ -82,6 +91,16 @@ app.get('/auth/github/callback',
     // Successful authentication, redirect home.
     res.redirect('/');
   });
+
+// repo name 
+app.get('/repo', isAuth, (req, res) => {
+    res.sendFile(__dirname+"/repo.html");
+});
+
+
+
+
+  
 
 
 app.listen(3000, () =>console.log('Server is running on port 3000'));

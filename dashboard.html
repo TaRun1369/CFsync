@@ -6,6 +6,17 @@
 </head>
 <body>
     <h1>Dashboard</h1>
+    <a href = "/repo">Enter repo or Change repo</a>
+    <br>
+    <h2></h2>
+
+    <script>
+        window.onload = function() {
+            var repoName = localStorage.getItem('repo');
+            document.querySelector('h2').textContent = repoName;
+        };
+    </script>
+    <br>
     <a href = "/logout">logout</a>
 </body>
 </html>

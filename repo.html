@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enter repo name</title>
+</head>
+<body>
+    <h1>Enter repo name</h1>
+    <form action="/repo" method="post">
+        <input type="text" name="repo" placeholder="Repo name">
+        <button type="submit">Submit</button>
+    </form>
+
+    <br>
+    <h2>    
+        <!-- fetch repo name from local storage using getItem() and display it here -->
+    </h2>
+    <script>
+        
+       
+
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var repoName = document.querySelector('input[name="repo"]').value;
+            localStorage.setItem('repo', repoName);
+            linkRepo(accesstoken,repoName);
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>
