@@ -39,6 +39,8 @@ passport.use(new GitHubStrategy({
     // User.findOrCreate({ githubId: profile.id }, function (err, user) {
     //   return cb(err, user);
     // });
+    // const accessToken1 = accessToken;
+    profile.accessToken = accessToken; // Storing accessToken in user profile
     console.log(profile);
     cb(null,profile);
   }
@@ -89,7 +91,9 @@ app.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
     // Successful authentication, redirect home.
+    // res.send(accessToken1);
     res.redirect('/');
+    // res.send(accessToken1);
   });
 
 // repo name 
@@ -99,7 +103,68 @@ app.get('/repo', isAuth, (req, res) => {
 
 
 
-
+const linkRepo = (accessToken, repositoryName) => {
+    const repositoryAuthenticationURL = `https://api.github.com/repos/${repositoryName}`;
+  
+    const xhttp = new XMLHttpRequest();
+    xhttp.addEventListener('readystatechange', function () {
+      if (xhttp.readyState === 4) {
+        const responseText = JSON.parse(xhttp.responseText);
+        const linkFlag = linkRepoStatusCode(xhttp.status, repositoryName);
+        if (xhttp.status === 200) {
+          if (!linkFlag) {
+  
+            chrome.storage.local.set({ current_phase: 'link_repo' }, () => {
+              console.log(`Error linking ${repositoryName}.`);
+            });
+  
+            chrome.storage.local.set({ github_LinkedRepository: null }, () => {
+              console.log('Set Repository link to null');
+            });
+  
+            document.getElementById('link_repo_phase').style.display = 'inherit';
+            document.getElementById('solve_and_push_phase').style.display = 'none';
+          } 
+          
+          else {
+            chrome.storage.local.set(
+              {current_phase:'solve_and_push', repo: responseText.html_url},
+              () => {
+                $('#error_info').hide();
+                $('#success_acknowledgement').html(`Successfully linked <a target="blank" href="${responseText.html_url}">${repositoryName}</a> to 'GfG To GitHub'. Start solving on <a href="https://www.geeksforgeeks.org/explore">GeeksforGeeks</a>&nbsp; now!`,);
+                $('#success_acknowledgement').show();
+                $('#unlinkRepository').show();
+              },
+            );
+  
+            chrome.storage.local.set(
+              { github_LinkedRepository: responseText.full_name }, () => {
+                console.log('Linked Repository Successfully');
+                chrome.storage.local.get('userStatistics', (solvedProblems) => {
+                  const { userStatistics } = solvedProblems;
+                  if (userStatistics && userStatistics.solved) {
+                    $('#successful_submissions').text(userStatistics.solved);
+                    $('#successful_submissions_school').text(userStatistics.school);
+                    $('#successful_submissions_basic').text(userStatistics.basic);
+                    $('#successful_submissions_easy').text(userStatistics.easy);
+                    $('#successful_submissions_medium').text(userStatistics.medium);
+                    $('#successful_submissions_hard').text(userStatistics.hard);
+                  }
+                });
+              },
+            );
+            document.getElementById('link_repo_phase').style.display = 'none';
+            document.getElementById('solve_and_push_phase').style.display = 'inherit';
+          }
+        }
+      }
+    });
+  
+    xhttp.open('GET', repositoryAuthenticationURL, true);
+    xhttp.setRequestHeader('Authorization', `token ${accessToken}`);
+    xhttp.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+    xhttp.send();
+  };
   
 
 
