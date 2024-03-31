@@ -13,6 +13,9 @@
     <script>
         var accessToken = '<%= profile.accessToken %>';
         localStorage.setItem('accessToken', accessToken);
+        var userLogin = '<%= profile._json.login%>';
+        localStorage.setItem('userName',userLogin);
+        console.log(userLogin);
         window.onload = function() {
             var repoName = localStorage.getItem('repo');
             document.querySelector('h2').textContent = repoName;

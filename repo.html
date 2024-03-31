@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enter repo name</title>
+    <title>Link GitHub Repo</title>
     <style>
         .green-sign {
             display: none;
@@ -15,150 +15,55 @@
     </style>
 </head>
 <body>
-    <h1>Enter repo name</h1>
-    <form action="/repo" method="post">
-        <input type="text" name="repo" placeholder="Repo name">
+    <h1>Link GitHub Repo</h1>
+    <form id="repoForm" action="/repo" method="post">
+        <input type="text" name="repo" id="repoInput" placeholder="Repo name">
         <button type="submit">Submit</button>
     </form>
 
     <br>
-    <h2>    
-        <!-- fetch repo name from local storage using getItem() and display it here -->
-    </h2>
     <h2 id="repoName"></h2>
     <div id="greenSign" class="green-sign">Repo is linked</div>
     <div id="redSign" class="red-sign">Repo is not linked</div>
-    <!-- if repo is link show some green sign else red sign  -->
+
     <script>
-        var accessToken = localStorage.getItem('accessToken');
-        console.log("access token - ");
-        console.log(accessToken);
-    // var accessToken1 = "{{accessToken}}"; // Get the access token from the server  
+        // Function to link the repository
+        const linkRepo = (accessToken, repositoryName,userName) => {
+            const repositoryAuthenticationURL = `https://api.github.com/repos/${userName}/${repositoryName}`;
 
-
-      
-    const linkRepoStatusCode = (statusCode, repositoryName) => {
-  let linkFlag = false;
-  switch (statusCode) {
-    case 301:
-      $('#success_acknowledgement').hide();
-      $('#unlinkRepository').hide();
-      $('#error_info').attr("style","display: block; line-height: 1;");
-      $('#error_info').html(
-        `Error linking <a target="blank" href="${`https://github.com/${repositoryName}`}">${repositoryName}</a> to 'GfG To GitHub'. <br> This repository has been moved permenantly. Try creating a new one.`,
-      );
-      $('#error_info').show();
-      break;
-
-    case 403:
-      $('#success_acknowledgement').hide();
-      $('#unlinkRepository').hide();
-      $('#error_info').attr("style","display: block; line-height: 1;");
-      $('#error_info').html(
-        `Error linking <a target="blank" href="${`https://github.com/${repositoryName}`}">${repositoryName}</a> to 'GfG To GitHub'. <br> Forbidden action. Please make sure you have the right access to this repository.`,
-      );
-      $('#error_info').show();
-      break;
-
-    case 404:
-      $('#success_acknowledgement').hide();
-      $('#unlinkRepository').hide();
-      $('#error_info').attr("style","display: block; line-height: 1;");
-      $('#error_info').html(`Error linking <a target="blank" href="${`https://github.com/${repositoryName}`}">${repositoryName}</a> to 'GfG To GitHub'. <br> Resource not found. Make sure you enter the right repository name.`,);
-      $('#error_info').show();
-      
-      break;
-
-    default:
-      linkFlag = true;
-      $('#unlinkRepository').show();
-      break;
-  }
-  return linkFlag;
-};
-
-    const linkRepo = (accessToken, repositoryName) => {
-    const repositoryAuthenticationURL = `https://api.github.com/repos/${repositoryName}`;
-  
-    const xhttp = new XMLHttpRequest();
-    xhttp.addEventListener('readystatechange', function () {
-      if (xhttp.readyState === 4) {
-        const responseText = JSON.parse(xhttp.responseText);
-        const linkFlag = linkRepoStatusCode(xhttp.status, repositoryName);
-        if (xhttp.status === 200) {
-          if (!linkFlag) {
-  
-            chrome.storage.local.set({ current_phase: 'link_repo' }, () => {
-              console.log(`Error linking ${repositoryName}.`);
+            const xhttp = new XMLHttpRequest();
+            xhttp.addEventListener('readystatechange', function () {
+                if (xhttp.readyState === 4) {
+                    const responseText = JSON.parse(xhttp.responseText);
+                    if (xhttp.status === 200) {
+                        document.getElementById('greenSign').style.display = 'block';
+                        document.getElementById('redSign').style.display = 'none';
+                        document.getElementById('repoName').textContent = responseText.full_name;
+                    } else {
+                        document.getElementById('greenSign').style.display = 'none';
+                        document.getElementById('redSign').style.display = 'block';
+                    }
+                }
             });
-  
-            chrome.storage.local.set({ github_LinkedRepository: null }, () => {
-              console.log('Set Repository link to null');
-            });
-  
-            document.getElementById('link_repo_phase').style.display = 'inherit';
-            document.getElementById('solve_and_push_phase').style.display = 'none';
-          } 
-          
-          else {
-            chrome.storage.local.set(
-              {current_phase:'solve_and_push', repo: responseText.html_url},
-              () => {
-                $('#error_info').hide();
-                $('#success_acknowledgement').html(`Successfully linked <a target="blank" href="${responseText.html_url}">${repositoryName}</a> to 'GfG To GitHub'. Start solving on <a href="https://www.geeksforgeeks.org/explore">GeeksforGeeks</a>&nbsp; now!`,);
-                $('#success_acknowledgement').show();
-                $('#unlinkRepository').show();
-              },
-            );
-  
-            chrome.storage.local.set(
-              { github_LinkedRepository: responseText.full_name }, () => {
-                console.log('Linked Repository Successfully');
-                chrome.storage.local.get('userStatistics', (solvedProblems) => {
-                  const { userStatistics } = solvedProblems;
-                  if (userStatistics && userStatistics.solved) {
-                    $('#successful_submissions').text(userStatistics.solved);
-                    $('#successful_submissions_school').text(userStatistics.school);
-                    $('#successful_submissions_basic').text(userStatistics.basic);
-                    $('#successful_submissions_easy').text(userStatistics.easy);
-                    $('#successful_submissions_medium').text(userStatistics.medium);
-                    $('#successful_submissions_hard').text(userStatistics.hard);
-                  }
-                });
-              },
-            );
-            document.getElementById('link_repo_phase').style.display = 'none';
-            document.getElementById('solve_and_push_phase').style.display = 'inherit';
-          }
-        }
-      }
-    });
-  
-    xhttp.open('GET', repositoryAuthenticationURL, true);
-    xhttp.setRequestHeader('Authorization', `token ${accessToken}`);
-    xhttp.setRequestHeader('Accept', 'application/vnd.github.v3+json');
-    xhttp.send();
-  };
-  
 
-        document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var repoName = document.querySelector('input[name="repo"]').value;
-            localStorage.setItem('repo', repoName);
-            // console.log(accessToken1);
-            linkRepo(accessToken,repoName);
-            window.location.href = '/';
-        });
-
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                document.getElementById('greenSign').style.display = 'block';
-                document.getElementById('redSign').style.display = 'none';
-            } else {
-                document.getElementById('greenSign').style.display = 'none';
-                document.getElementById('redSign').style.display = 'block';
-            }
+            xhttp.open('GET', repositoryAuthenticationURL, true);
+            xhttp.setRequestHeader('Authorization', `token ${accessToken}`);
+            xhttp.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+            xhttp.send();
         };
+
+        // Event listener for form submission
+        document.getElementById('repoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var repoName = document.getElementById('repoInput').value;
+            localStorage.setItem('repo', repoName);
+            var accessToken = localStorage.getItem('accessToken');
+            console.log("access token - ");
+            console.log(accessToken);
+            var userName = localStorage.getItem('userName');
+            console.log(userName);
+            linkRepo(accessToken,repoName,userName);
+        });
     </script>
 </body>
 </html>
