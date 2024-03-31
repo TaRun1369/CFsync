@@ -30,7 +30,10 @@
     <div id="redSign" class="red-sign">Repo is not linked</div>
     <!-- if repo is link show some green sign else red sign  -->
     <script>
-        
+        var accessToken = localStorage.getItem('accessToken');
+        console.log("access token - ");
+        console.log(accessToken);
+    // var accessToken1 = "{{accessToken}}"; // Get the access token from the server  
     const linkRepo = (accessToken, repositoryName) => {
     const repositoryAuthenticationURL = `https://api.github.com/repos/${repositoryName}`;
   
@@ -99,7 +102,8 @@
             event.preventDefault();
             var repoName = document.querySelector('input[name="repo"]').value;
             localStorage.setItem('repo', repoName);
-            linkRepo(profile.accessToken,repoName);
+            // console.log(accessToken1);
+            linkRepo(accessToken,repoName);
             window.location.href = '/';
         });
 
