@@ -34,6 +34,49 @@
         console.log("access token - ");
         console.log(accessToken);
     // var accessToken1 = "{{accessToken}}"; // Get the access token from the server  
+
+
+      
+    const linkRepoStatusCode = (statusCode, repositoryName) => {
+  let linkFlag = false;
+  switch (statusCode) {
+    case 301:
+      $('#success_acknowledgement').hide();
+      $('#unlinkRepository').hide();
+      $('#error_info').attr("style","display: block; line-height: 1;");
+      $('#error_info').html(
+        `Error linking <a target="blank" href="${`https://github.com/${repositoryName}`}">${repositoryName}</a> to 'GfG To GitHub'. <br> This repository has been moved permenantly. Try creating a new one.`,
+      );
+      $('#error_info').show();
+      break;
+
+    case 403:
+      $('#success_acknowledgement').hide();
+      $('#unlinkRepository').hide();
+      $('#error_info').attr("style","display: block; line-height: 1;");
+      $('#error_info').html(
+        `Error linking <a target="blank" href="${`https://github.com/${repositoryName}`}">${repositoryName}</a> to 'GfG To GitHub'. <br> Forbidden action. Please make sure you have the right access to this repository.`,
+      );
+      $('#error_info').show();
+      break;
+
+    case 404:
+      $('#success_acknowledgement').hide();
+      $('#unlinkRepository').hide();
+      $('#error_info').attr("style","display: block; line-height: 1;");
+      $('#error_info').html(`Error linking <a target="blank" href="${`https://github.com/${repositoryName}`}">${repositoryName}</a> to 'GfG To GitHub'. <br> Resource not found. Make sure you enter the right repository name.`,);
+      $('#error_info').show();
+      
+      break;
+
+    default:
+      linkFlag = true;
+      $('#unlinkRepository').show();
+      break;
+  }
+  return linkFlag;
+};
+
     const linkRepo = (accessToken, repositoryName) => {
     const repositoryAuthenticationURL = `https://api.github.com/repos/${repositoryName}`;
   
