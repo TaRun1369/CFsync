@@ -44,7 +44,7 @@ passport.use(new GitHubStrategy({
     // const accessToken1 = accessToken;
     profile.accessToken = accessToken;
     // accessToken1 = profile.accessToken; // Storing accessToken in user profile
-    // console.log(profile);
+    console.log(profile);
     cb(null, profile);
   }
 ));
@@ -111,5 +111,45 @@ app.get('/repo', isAuth, (req, res) => {
 
 
 
+const fetch = require('node-fetch');
+
+let previousId = null;
+
+
+function fetchUserStatus(handle) {
+  return fetch(`https://codeforces.com/api/user.status?handle=${handle}`)
+    .then(response => response.json())
+    .then(data => {
+      // Get the most recent verdict
+      const mostRecentVerdict = data.result[0];
+
+      // If the ID of the most recent verdict matches the previous ID, return false
+      if (mostRecentVerdict.id === previousId) {
+        return false;
+      }
+
+      // Update the previous ID
+      previousId = mostRecentVerdict.id;
+
+      // Return the verdict
+      return {verdict : mostRecentVerdict.verdict,
+          id : mostRecentVerdict.id};
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      return false;
+    });
+}
+
+// Call the function with the handle you want to fetch every minute
+setInterval(() => {
+  fetchUserStatus('Failure101').then(result => {
+    if (result === false) {
+      console.log('No new verdicts');
+    } else {
+      console.log('New verdict:', result);
+    }
+  });
+}, 60 * 1000); // 60 * 1000 milliseconds = 1 minute
 
 app.listen(3000, () => console.log('Server is running on port 3000'));
