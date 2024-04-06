@@ -109,7 +109,28 @@ app.get('/repo', isAuth, (req, res) => {
   // res.redirect("/repo");
 });
 
+const languageExtensions = {
+  "C++17 (GCC 7-32)": "cpp",
+  "Python 3": "py",
+  "Python 2": "py",
+  "Java 8": "java",
+  "Java 11": "java",
+  "Pascal": "pas",
+  "Perl": "pl",
+  "C#": "cs",
+  "JavaScript": "js",
+  "Ruby": "rb",
+  "Kotlin": "kt",
+  "Go": "go",
+  "Scala": "scala",
+  "PHP": "php",
+  "Haskell": "hs",
+  "Rust": "rs",
+  // Add more mappings as needed
+};
 
+// Usage
+console.log(languageExtensions["C++17 (GCC 7-32)"]); // Outputs: cpp
 
 const fetch = require('node-fetch');
 
@@ -133,7 +154,8 @@ function fetchUserStatus(handle) {
 
       // Return the verdict
       return {verdict : mostRecentVerdict.verdict,
-          id : mostRecentVerdict.id};
+          id : mostRecentVerdict.id,
+        lang : mostRecentVerdict.programmingLanguage};
     })
     .catch(error => {
       console.error('Error:', error);
@@ -151,5 +173,87 @@ setInterval(() => {
     }
   });
 }, 60 * 1000); // 60 * 1000 milliseconds = 1 minute
+
+
+
+
+
+// const { Octokit } = require("@octokit/rest");
+// // const fetch = require("node-fetch");
+
+// const octokit = new Octokit({ auth: "your_personal_access_token" });
+
+// async function uploadToGithub(repo, gitPath, codeContent, problemInfo = '') {
+//     const [owner, repoName] = repo.split('/');
+//     const folderPath = gitPath.split('/').slice(0, -1).join('/');
+    
+//     let allPaths;
+//     try {
+//         const { data } = await octokit.repos.getContent({ owner, repo: repoName, path: folderPath });
+//         allPaths = data.map(file => file.path);
+//     } catch (error) {
+//         if (problemInfo) {
+//             await octokit.repos.createOrUpdateFileContents({
+//                 owner,
+//                 repo: repoName,
+//                 path: `${folderPath}/__info.txt`,
+//                 message: "Created info.txt",
+//                 content: Buffer.from(problemInfo).toString('base64'),
+//                 branch: "main"
+//             });
+//         }
+//         allPaths = [];
+//     }
+
+//     if (!allPaths.includes(gitPath)) {
+//         await octokit.repos.createOrUpdateFileContents({
+//             owner,
+//             repo: repoName,
+//             path: gitPath,
+//             message: 'Committing files',
+//             content: Buffer.from(codeContent).toString('base64'),
+//             branch: "main"
+//         });
+//         console.log(gitPath, 'CREATED');
+//     } else {
+//         console.log(gitPath, 'ALREADY EXISTS');
+//     }
+// }
+
+// async function fetchProblemDetails(problemId) {
+//     const response = await fetch(`https://codeforces.com/api/problemset.problem?tags=${problemId}`);
+//     const { result } = await response.json();
+//     if (result) {
+//         const problem = result.problem;
+//         const { name, index, statement } = problem;
+//         const { inputSpecification, outputSpecification, note } = statement;
+
+//         const readmeContent = `
+// # Problem ${index}: ${name}
+
+// ## Problem Statement
+// ${note}
+
+// ## Input
+// ${inputSpecification}
+
+// ## Output
+// ${outputSpecification}
+// `;
+
+//         return readmeContent;
+//     } else {
+//         throw new Error('Problem details not found');
+//     }
+// }
+
+// async function uploadCodeAndReadme(ownerRepo, gitPath, codeContent, problemId) {
+//     const problemInfo = await fetchProblemDetails(problemId);
+//     await uploadToGithub(ownerRepo, gitPath, codeContent, problemInfo);
+// }
+
+// Call the function
+// uploadCodeAndReadme('owner/repo', 'path/to/directory', 'code content', 'problemId');
+
 
 app.listen(3000, () => console.log('Server is running on port 3000'));

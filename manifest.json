@@ -1,0 +1,15 @@
+{
+    "name": "CFtoGithub",
+    "description": "Let your GitHub process with CF",
+    "version": "0.0.1",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "login.html",
+        "default_icon": "icon.png"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["views/dashboard.ejs", "repo.html"]
+        }
+    ]
+}
